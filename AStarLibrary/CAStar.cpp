@@ -77,11 +77,9 @@ bool CAStar::PathFind(int startX, int startY, int destinationX, int destinationY
 		{
 			if (setRouteArray(pOpenListNode, routeNodeArray, routeNodeArraySize) == false)
 			{
-				clearOpenList();
+				CSystemLog::GetInstance()->Log(TRUE, CSystemLog::eLogLevel::LogLevelError, L"AStar", L"[PathFind] setRouteArray, routeNodeArraySize : %d", routeNodeArraySize);
 
-				clearClosedFlag();
-
-				return false;
+				break;
 			}
 
 			clearOpenList();
