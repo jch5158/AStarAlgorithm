@@ -28,7 +28,7 @@ public:
 	};
 
 	bool PathFind(int startX, int startY, int destinationX, int destinationY, stRouteNode routeNodeArray[], int routeNodeArraySize);
-	
+
 	bool SetMapAttribute(int x, int y, eNodeAttribute nodeAttribute);
 
 	void ResetMapAttribute(void);
@@ -44,12 +44,14 @@ private:
 
 		// 블럭 이동 횟수
 		float G;
-		
+
 		// 목적지까지의 블럭의 개수
 		float H;
 
 		// G+H 값
 		float F;
+
+		bool bClosedFlag;
 
 		eNodeAttribute nodeAttribute;
 
@@ -72,27 +74,23 @@ private:
 	void createNode(int x, int y, stNode* pParentNode);
 
 	stNode* getExplorationNodeFromOpenList(void);
-
-	stNode* findClosedListNode(int x, int y);
 	stNode* findOpenListNode(int x, int y);
 
-	bool setRouteArray(stNode *pDestNode, stRouteNode routeNodeArray[], int routeNodeArraySize);
+
+	bool setRouteArray(stNode* pDestNode, stRouteNode routeNodeArray[], int routeNodeArraySize);
 	bool makeBresenhamLine(int startX, int startY, int endX, int endY);
 	void makeOptimizePath(stNode* pNode);
 
-
 	void clearOpenList(void);
-	void clearClosedList(void);
+	void clearClosedFlag(void);
 
+	stNode** mMap;
 
-	char** mMap;
-	
 	int mMapWidth;
 	int mMapHeight;
 
 	stNode mDestinationNode;
 
 	std::list<stNode*> mOpenList;
-	std::list<stNode*> mClosedList;	
 };
 

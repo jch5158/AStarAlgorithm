@@ -8,7 +8,6 @@ CAStar::CAStar(void)
 	, mMapHeight(0)
 	, mDestinationNode{ 0, }
 	, mOpenList()
-	, mClosedList()
 {}
 
 CAStar::CAStar(int mapWidth, int mapHeight)
@@ -17,15 +16,21 @@ CAStar::CAStar(int mapWidth, int mapHeight)
 	, mMapHeight(mapHeight)
 	, mDestinationNode{ 0, }
 	, mOpenList()
-	, mClosedList()
 {
-	mMap = new char* [mapHeight];
+	mMap = new stNode * [mapHeight];
 
 	for (int indexY = 0; indexY < mapHeight; ++indexY)
 	{
-		mMap[indexY] = new char[mapWidth];	
+		mMap[indexY] = new stNode[mapWidth];
 
 		ZeroMemory(mMap[indexY], mapWidth);
+
+		for (int indexX = 0; indexX < mapWidth; ++indexX)
+		{
+			mMap[indexY][indexX].x = indexX;
+			mMap[indexY][indexX].y = indexY;
+			mMap[indexY][indexX].bClosedFlag = false;
+		}
 	}
 }
 
@@ -47,18 +52,8 @@ bool CAStar::PathFind(int startX, int startY, int destinationX, int destinationY
 		return false;
 	}
 
-	stNode* pStartNode = (stNode*)malloc(sizeof(stNode));
-	if (pStartNode == nullptr)
-	{
-		CSystemLog::GetInstance()->Log(true, CSystemLog::eLogLevel::LogLevelError, L"AStar", L"[PathFind] malloc is nullptr return : %d", GetLastError());
+	stNode* pStartNode = &mMap[startY][startX];
 
-		CCrashDump::Crash();
-
-		return false;
-	}
-
-	pStartNode->x = startX;
-	pStartNode->y = startY;
 	pStartNode->pParentNode = nullptr;
 	pStartNode->G = 0.0f;
 	pStartNode->H = (float)(abs(startX - destinationX) + abs(startY - destinationY));
@@ -80,21 +75,18 @@ bool CAStar::PathFind(int startX, int startY, int destinationX, int destinationY
 		}
 		else if (pOpenListNode->x == destinationX && pOpenListNode->y == destinationY)
 		{
-			for (int index = 0; index < routeNodeArraySize; ++index)
+			if (setRouteArray(pOpenListNode, routeNodeArray, routeNodeArraySize) == false)
 			{
-				if (setRouteArray(pOpenListNode, routeNodeArray, routeNodeArraySize) == false)
-				{
-					clearOpenList();
+				clearOpenList();
 
-					clearClosedList();
+				clearClosedFlag();
 
-					return false;
-				}
+				return false;
 			}
 
 			clearOpenList();
 
-			clearClosedList();
+			clearClosedFlag();
 
 			return true;
 		}
@@ -107,7 +99,7 @@ bool CAStar::PathFind(int startX, int startY, int destinationX, int destinationY
 
 	clearOpenList();
 
-	clearClosedList();
+	clearClosedFlag();
 
 	return false;
 }
@@ -121,8 +113,8 @@ bool CAStar::SetMapAttribute(int x, int y, eNodeAttribute nodeAttribute)
 		return false;
 	}
 
-	mMap[y][x] = (char)nodeAttribute;
-		
+	mMap[y][x].nodeAttribute = nodeAttribute;
+
 	return true;
 }
 
@@ -132,7 +124,7 @@ void CAStar::ResetMapAttribute(void)
 	{
 		for (int indexX = 0; indexX < mMapWidth; ++indexX)
 		{
-			mMap[indexY][indexX] = (char)eNodeAttribute::NODE_UNBLOCK;
+			mMap[indexY][indexX].nodeAttribute = eNodeAttribute::NODE_UNBLOCK;
 		}
 	}
 
@@ -168,7 +160,7 @@ void CAStar::createSurroundNode(stNode* pNode)
 
 void CAStar::createNode(int x, int y, stNode* pParentNode)
 {
-	if (mMap[y][x] == (char)eNodeAttribute::NODE_BLOCK || findClosedListNode(x, y) != nullptr)
+	if (mMap[y][x].nodeAttribute == eNodeAttribute::NODE_BLOCK || mMap[y][x].bClosedFlag == true)
 	{
 		return;
 	}
@@ -176,18 +168,7 @@ void CAStar::createNode(int x, int y, stNode* pParentNode)
 	stNode* pOpenListNode = findOpenListNode(x, y);
 	if (pOpenListNode == nullptr)
 	{
-		stNode* pNewNode = (stNode*)malloc(sizeof(stNode));
-		if (pNewNode == nullptr)
-		{
-			CSystemLog::GetInstance()->Log(TRUE, CSystemLog::eLogLevel::LogLevelError, L"AStar", L"[createNode] Error Code : %d", GetLastError());
-
-			CCrashDump::Crash();
-
-			return;
-		}	
-
-		pNewNode->x = x;
-		pNewNode->y = y;
+		stNode* pNewNode = &mMap[y][x];
 		pNewNode->pParentNode = pParentNode;
 
 		if (abs(x - pParentNode->x) == 1 && abs(y - pParentNode->y) == 1)
@@ -202,7 +183,7 @@ void CAStar::createNode(int x, int y, stNode* pParentNode)
 		pNewNode->H = abs(x - mDestinationNode.x) + abs(y - mDestinationNode.y);
 
 		pNewNode->F = pNewNode->G + pNewNode->H;
-	
+
 		mOpenList.push_back(pNewNode);
 	}
 	else
@@ -241,22 +222,9 @@ CAStar::stNode* CAStar::getExplorationNodeFromOpenList(void)
 	mOpenList.erase(iter);
 
 	// closedList에 추가한다.
-	mClosedList.push_back(pNode);
+	mMap[pNode->y][pNode->x].bClosedFlag = true;
 
 	return pNode;
-}
-
-CAStar::stNode* CAStar::findClosedListNode(int x, int y)
-{
-	for (stNode* pNode : mClosedList)
-	{
-		if (pNode->x == x && pNode->y == y)
-		{
-			return pNode;	
-		}
-	}
-
-	return nullptr;
 }
 
 
@@ -266,14 +234,14 @@ CAStar::stNode* CAStar::findOpenListNode(int x, int y)
 	{
 		if (pNode->x == x && pNode->y == y)
 		{
-			return pNode;	
+			return pNode;
 		}
 	}
 
 	return nullptr;
 }
 
-bool CAStar::setRouteArray(stNode* pDestNode,stRouteNode routeNodeArray[], int routeNodeArraySize)
+bool CAStar::setRouteArray(stNode* pDestNode, stRouteNode routeNodeArray[], int routeNodeArraySize)
 {
 	makeOptimizePath(pDestNode);
 
@@ -309,6 +277,33 @@ bool CAStar::setRouteArray(stNode* pDestNode,stRouteNode routeNodeArray[], int r
 
 	return true;
 }
+
+void CAStar::clearOpenList(void)
+{
+	auto iterE = mOpenList.end();
+
+	for (auto iter = mOpenList.begin(); iter != iterE; )
+	{
+		iter = mOpenList.erase(iter);
+	}
+
+	return;
+}
+
+
+void CAStar::clearClosedFlag(void)
+{
+	for (int indexY = 0; indexY < mMapHeight; ++indexY)
+	{
+		for (int indexX = 0; indexX < mMapWidth; ++indexX)
+		{
+			mMap[indexY][indexX].bClosedFlag = false;
+		}
+	}
+
+	return;
+}
+
 
 
 bool CAStar::makeBresenhamLine(int startX, int startY, int endX, int endY)
@@ -353,7 +348,7 @@ bool CAStar::makeBresenhamLine(int startX, int startY, int endX, int endY)
 				break;
 			}
 
-			if (mMap[indexY][indexX] == (char)eNodeAttribute::NODE_BLOCK)
+			if (mMap[indexY][indexX].nodeAttribute == eNodeAttribute::NODE_BLOCK)
 			{
 				return false;
 			}
@@ -396,7 +391,7 @@ bool CAStar::makeBresenhamLine(int startX, int startY, int endX, int endY)
 				break;
 			}
 
-			if (mMap[indexY][indexX] == (char)eNodeAttribute::NODE_BLOCK)
+			if (mMap[indexY][indexX].nodeAttribute == eNodeAttribute::NODE_BLOCK)
 			{
 				return false;
 			}
@@ -488,39 +483,11 @@ void CAStar::makeOptimizePath(stNode* pNode)
 }
 
 
-void CAStar::clearOpenList(void)
-{
-	auto iterE = mOpenList.end();
-
-	for (auto iter = mOpenList.begin(); iter != iterE; )
-	{
-		free(*iter);
-	
-		iter = mOpenList.erase(iter);
-	}
-
-	return;
-}
 
 
-void CAStar::clearClosedList(void)
-{
-	auto iterE = mClosedList.end();
+CAStar::CSortAscendingOrder::CSortAscendingOrder(void) {}
 
-	for (auto iter = mClosedList.begin(); iter != iterE;)
-	{
-		free(*iter);
-
-		iter = mClosedList.erase(iter);
-	}
-
-	return;
-}
-
-
-CAStar::CSortAscendingOrder::CSortAscendingOrder(void){}
-
-CAStar::CSortAscendingOrder::~CSortAscendingOrder(void){}
+CAStar::CSortAscendingOrder::~CSortAscendingOrder(void) {}
 
 bool CAStar::CSortAscendingOrder::operator()(const stNode* pLeft, const stNode* pRight) const
 {
