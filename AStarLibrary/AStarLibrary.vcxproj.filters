@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="PCH">
+      <UniqueIdentifier>{70d986b6-a1a5-4833-bd27-45cec2e72477}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Library">
+      <UniqueIdentifier>{6af9e125-c0d4-47ac-95ec-6f4bff10e87a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\AStar">
+      <UniqueIdentifier>{c930dcff-b132-4c60-b38c-3fc338a3a658}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\Dump">
+      <UniqueIdentifier>{4e71c6eb-eb24-49d7-94b3-8e5354a23d43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\SystemLog">
+      <UniqueIdentifier>{c01a166a-3924-4381-bd47-dadca28888c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\PerformanceProfiler">
+      <UniqueIdentifier>{c865a083-efce-4ad5-9c4d-4a240f387ead}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AStarLibrary.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>PCH</Filter>
+    </ClCompile>
+    <ClCompile Include="CAStar.cpp">
+      <Filter>Library\AStar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\PerformanceProfiler\PerformanceProfiler\CTLSPerformanceProfiler.cpp">
+      <Filter>Library\PerformanceProfiler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\PerformanceProfiler\PerformanceProfiler\CPerformanceProfiler.cpp">
+      <Filter>Library\PerformanceProfiler</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>PCH</Filter>
+    </ClInclude>
+    <ClInclude Include="CAStar.h">
+      <Filter>Library\AStar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\PerformanceProfiler\PerformanceProfiler\CPerformanceProfiler.h">
+      <Filter>Library\PerformanceProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\PerformanceProfiler\PerformanceProfiler\CTLSPerformanceProfiler.h">
+      <Filter>Library\PerformanceProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\DumpLibrary\DumpLibrary\CCrashDump.h">
+      <Filter>Library\Dump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SystemLogLibrary\SystemLogLibrary\CSystemLog.h">
+      <Filter>Library\SystemLog</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
