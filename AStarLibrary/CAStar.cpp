@@ -29,7 +29,6 @@ CAStar::CAStar(int mapWidth, int mapHeight)
 		{
 			mMap[indexY][indexX].x = indexX;
 			mMap[indexY][indexX].y = indexY;
-			mMap[indexY][indexX].bClosedFlag = false;
 		}
 	}
 }
@@ -82,9 +81,9 @@ bool CAStar::PathFind(int startX, int startY, int destinationX, int destinationY
 				break;
 			}
 
-			clearOpenList();
+			mOpenList.clear();
 
-			clearClosedFlag();
+			resetNodeState();
 
 			return true;
 		}
@@ -95,9 +94,9 @@ bool CAStar::PathFind(int startX, int startY, int destinationX, int destinationY
 		mOpenList.sort(CSortAscendingOrder());
 	}
 
-	clearOpenList();
+	mOpenList.clear();
 
-	clearClosedFlag();
+	resetNodeState();
 
 	return false;
 }
@@ -158,31 +157,32 @@ void CAStar::createSurroundNode(stNode* pNode)
 
 void CAStar::createNode(int x, int y, stNode* pParentNode)
 {
-	if (mMap[y][x].nodeAttribute == eNodeAttribute::NODE_BLOCK || mMap[y][x].bClosedFlag == true)
+	if (mMap[y][x].nodeAttribute == eNodeAttribute::NODE_BLOCK || mMap[y][x].nodeState == eNodeState::NODE_CLOSED)
 	{
 		return;
 	}
 
-	stNode* pOpenListNode = findOpenListNode(x, y);
-	if (pOpenListNode == nullptr)
-	{
-		stNode* pNewNode = &mMap[y][x];
-		pNewNode->pParentNode = pParentNode;
+	stNode* pOpenListNode = &mMap[y][x];
+	if (pOpenListNode->nodeState == eNodeState::NODE_NONE)
+	{	
+		pOpenListNode->pParentNode = pParentNode;
 
 		if (abs(x - pParentNode->x) == 1 && abs(y - pParentNode->y) == 1)
 		{
-			pNewNode->G = pParentNode->G + 1.5f;
+			pOpenListNode->G = pParentNode->G + 1.5f;
 		}
 		else
 		{
-			pNewNode->G = pParentNode->G + 1.0f;
+			pOpenListNode->G = pParentNode->G + 1.0f;
 		}
 
-		pNewNode->H = abs(x - mDestinationNode.x) + abs(y - mDestinationNode.y);
+		pOpenListNode->H = abs(x - mDestinationNode.x) + abs(y - mDestinationNode.y);
 
-		pNewNode->F = pNewNode->G + pNewNode->H;
+		pOpenListNode->F = pOpenListNode->G + pOpenListNode->H;
 
-		mOpenList.push_back(pNewNode);
+		pOpenListNode->nodeState = eNodeState::NODE_OPENED;
+
+		mOpenList.push_back(pOpenListNode);
 	}
 	else
 	{
@@ -218,9 +218,8 @@ CAStar::stNode* CAStar::getExplorationNodeFromOpenList(void)
 
 	// openList에서 제거한다.
 	mOpenList.erase(iter);
-
-	// closedList에 추가한다.
-	mMap[pNode->y][pNode->x].bClosedFlag = true;
+	
+	mMap[pNode->y][pNode->x].nodeState = eNodeState::NODE_CLOSED;
 
 	return pNode;
 }
@@ -276,26 +275,15 @@ bool CAStar::setRouteArray(stNode* pDestNode, stRouteNode routeNodeArray[], int 
 	return true;
 }
 
-void CAStar::clearOpenList(void)
-{
-	auto iterE = mOpenList.end();
-
-	for (auto iter = mOpenList.begin(); iter != iterE; )
-	{
-		iter = mOpenList.erase(iter);
-	}
-
-	return;
-}
 
 
-void CAStar::clearClosedFlag(void)
+void CAStar::resetNodeState(void)
 {
 	for (int indexY = 0; indexY < mMapHeight; ++indexY)
 	{
 		for (int indexX = 0; indexX < mMapWidth; ++indexX)
 		{
-			mMap[indexY][indexX].bClosedFlag = false;
+			mMap[indexY][indexX].nodeState = eNodeState::NODE_NONE;
 		}
 	}
 

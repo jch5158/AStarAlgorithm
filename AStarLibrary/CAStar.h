@@ -37,6 +37,13 @@ private:
 
 	CAStar(void);
 
+	enum class eNodeState
+	{
+		NODE_NONE,
+		NODE_OPENED,
+		NODE_CLOSED
+	};
+
 	struct stNode
 	{
 		int x;
@@ -51,7 +58,9 @@ private:
 		// G+H °ª
 		float F;
 
-		bool bClosedFlag;
+		//bool bClosedFlag;
+
+		eNodeState nodeState;
 
 		eNodeAttribute nodeAttribute;
 
@@ -81,8 +90,7 @@ private:
 	bool makeBresenhamLine(int startX, int startY, int endX, int endY);
 	void makeOptimizePath(stNode* pNode);
 
-	void clearOpenList(void);
-	void clearClosedFlag(void);
+	void resetNodeState(void);
 
 	stNode** mMap;
 
