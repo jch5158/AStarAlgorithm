@@ -225,18 +225,6 @@ CAStar::stNode* CAStar::getExplorationNodeFromOpenList(void)
 }
 
 
-CAStar::stNode* CAStar::findOpenListNode(int x, int y)
-{
-	for (stNode* pNode : mOpenList)
-	{
-		if (pNode->x == x && pNode->y == y)
-		{
-			return pNode;
-		}
-	}
-
-	return nullptr;
-}
 
 bool CAStar::setRouteArray(stNode* pDestNode, stRouteNode routeNodeArray[], int routeNodeArraySize)
 {
