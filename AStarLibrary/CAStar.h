@@ -58,8 +58,6 @@ private:
 		// G+H °ª
 		float F;
 
-		//bool bClosedFlag;
-
 		eNodeState nodeState;
 
 		eNodeAttribute nodeAttribute;
@@ -82,9 +80,7 @@ private:
 
 	void createNode(int x, int y, stNode* pParentNode);
 
-	stNode* getExplorationNodeFromOpenList(void);
-	stNode* findOpenListNode(int x, int y);
-
+	stNode* getExplorationNodeFromOpenList(void);	
 
 	bool setRouteArray(stNode* pDestNode, stRouteNode routeNodeArray[], int routeNodeArraySize);
 	bool makeBresenhamLine(int startX, int startY, int endX, int endY);

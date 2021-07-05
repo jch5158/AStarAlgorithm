@@ -27,6 +27,8 @@ CAStar::CAStar(int mapWidth, int mapHeight)
 
 		for (int indexX = 0; indexX < mapWidth; ++indexX)
 		{
+			mMap[indexY][indexX].nodeAttribute = eNodeAttribute::NODE_UNBLOCK;
+			mMap[indexY][indexX].nodeState = eNodeState::NODE_NONE;
 			mMap[indexY][indexX].x = indexX;
 			mMap[indexY][indexX].y = indexY;
 		}
@@ -62,6 +64,7 @@ bool CAStar::PathFind(int startX, int startY, int destinationX, int destinationY
 	// 도착지 노드 셋팅
 	mDestinationNode.x = destinationX;
 	mDestinationNode.y = destinationY;
+
 
 	mOpenList.push_back(pStartNode);
 
