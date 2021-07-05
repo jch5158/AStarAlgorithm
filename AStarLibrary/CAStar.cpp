@@ -23,12 +23,10 @@ CAStar::CAStar(int mapWidth, int mapHeight)
 	{
 		mMap[indexY] = new stNode[mapWidth];
 
-		ZeroMemory(mMap[indexY], mapWidth);
+		ZeroMemory(mMap[indexY], sizeof(stNode) * mapWidth);
 
 		for (int indexX = 0; indexX < mapWidth; ++indexX)
 		{
-			mMap[indexY][indexX].nodeAttribute = eNodeAttribute::NODE_UNBLOCK;
-			mMap[indexY][indexX].nodeState = eNodeState::NODE_NONE;
 			mMap[indexY][indexX].x = indexX;
 			mMap[indexY][indexX].y = indexY;
 		}
