@@ -1,25 +1,19 @@
 #pragma once
 
-#include <iostream>
-#include <Windows.h>
-#include <list>
 
 class CAStar
 {
 public:
 
-	CAStar(int mapWidth, int mapHeight);
-
-	~CAStar(void);
-
 	struct stRouteNode
 	{
+		// 찾은 경로의 사용여부를 체크해줌
 		bool bUseFlag;
 		int x;
 		int y;
 	};
 
-	enum class eNodeAttribute
+	enum class eNodeAttribute : int
 	{
 		NODE_UNBLOCK,
 		NODE_BLOCK,
@@ -27,17 +21,10 @@ public:
 		NODE_DESTINATION_POINT
 	};
 
-	bool PathFind(int startX, int startY, int destinationX, int destinationY, stRouteNode routeNodeArray[], int routeNodeArraySize);
-
-	bool SetMapAttribute(int x, int y, eNodeAttribute nodeAttribute);
-
-	void ResetMapAttribute(void);
 
 private:
 
-	CAStar(void);
-
-	enum class eNodeState
+	enum class eNodeState : int
 	{
 		NODE_NONE,
 		NODE_OPENED,
@@ -49,46 +36,66 @@ private:
 		int x;
 		int y;
 
-		// 블럭 이동 횟수
-		float G;
+		float G;  // 블럭 이동 횟수
+		float H;  // 목적지까지의 블럭의 개수
+		float F;  // G + H
 
-		// 목적지까지의 블럭의 개수
-		float H;
-
-		// G+H 값
-		float F;
-
-		eNodeState nodeState;
-
-		eNodeAttribute nodeAttribute;
-
-		stNode* pParentNode;
+		eNodeState nodeState;         // 탐색여부
+		eNodeAttribute nodeAttribute; // unblock or block
+		stNode* pParentNode;          // 부모 노드
 	};
 
-	class CSortAscendingOrder
+	class CAscendingOrder
 	{
 	public:
 
-		CSortAscendingOrder(void);
+		CAscendingOrder(void) = default;
+		~CAscendingOrder(void) = default;	
 
-		~CSortAscendingOrder(void);
+		CAscendingOrder(const CAscendingOrder&) = delete;
+		CAscendingOrder& operator=(const CAscendingOrder&) = delete;
 
 		bool operator()(const stNode* pLeft, const stNode* pRight) const;
 	};
 
-	void createSurroundNode(stNode* pNode);
 
+public:
+
+	CAStar(int mapWidth, int mapHeight);
+	~CAStar(void) = default;
+
+	CAStar(const CAStar&) = delete;
+	CAStar& operator=(const CAStar&) = delete;
+
+
+	// 길 찾기 시작
+	bool PathFind(int startX, int startY, int destinationX, int destinationY, std::vector<stRouteNode> &route);
+
+	// 맵 속성 셋팅
+	bool SetMapAttribute(int x, int y, eNodeAttribute nodeAttribute);
+
+	// 맵 속성 리셋
+	void ResetMapAttribute(void);
+
+private:
+
+
+	// openList에서 뽑은 노드를 기준으로 주변 노드를 생성한다.
+	void findRoute(stNode* pNode);
+
+	// openList에 들어갈 노드 생성
 	void createNode(int x, int y, stNode* pParentNode);
 
-	stNode* getExplorationNodeFromOpenList(void);	
+	// open List에서 가장 작은 list를 뽑는다.
+	stNode* findOpenNode(void);	
 
-	bool setRouteArray(stNode* pDestNode, stRouteNode routeNodeArray[], int routeNodeArraySize);
+	void setRouteArray(stNode* pDestNode, std::vector<stRouteNode>& route);
+	
+	// 경로 최적화
 	bool makeBresenhamLine(int startX, int startY, int endX, int endY);
 	void makeOptimizePath(stNode* pNode);
 
-	void resetNodeState(void);
-
-	stNode** mMap;
+	void resetNodeState(void);  //  NONE_NODE로 초기화
 
 	int mMapWidth;
 	int mMapHeight;
@@ -96,5 +103,6 @@ private:
 	stNode mDestinationNode;
 
 	std::list<stNode*> mOpenList;
+	std::vector<std::vector<stNode>> mMap;
 };
 

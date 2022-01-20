@@ -86,16 +86,20 @@ void TestPathFind(const WCHAR* pFildName, const WCHAR* pTag)
         }
     }
 
-    for (int index = 0; index < 1000; ++index)
+    std::vector<CAStar::stRouteNode> route;
+
+    for (int cnt = 0; cnt < 100; ++cnt)
     {
         CTLSPerformanceProfiler profiler(pTag);
 
-        if (astar.PathFind(startX, startY, destX, destY, routeArray, _countof(routeArray)) == false)
+        for (int index = 0; index < 100; ++index)
         {
-            CCrashDump::Crash();
+            if (astar.PathFind(startX, startY, destX, destY, route) == false)
+            {
+                CCrashDump::Crash();
+            }
         }
     }
-
 
     return;
 }
